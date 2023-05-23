@@ -1,0 +1,88 @@
+import java.util.*;
+
+class Job {
+    private String name;
+    private int deadline;
+    private int profit;
+
+    public Job(String name, int deadline, int profit) {
+        this.name = name;
+        this.deadline = deadline;
+        this.profit = profit;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getDeadline() {
+        return deadline;
+    }
+
+    public int getProfit() {
+        return profit;
+    }
+}
+
+public class JobScheduling {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of jobs: ");
+        int numJobs = scanner.nextInt();
+
+        List<Job> jobs = new ArrayList<>();
+
+        for (int i = 0; i < numJobs; i++) {
+            System.out.println("Enter details for Job " + (i + 1) + ":");
+            System.out.print("Name: ");
+            String name = scanner.next();
+            System.out.print("Deadline: ");
+            int deadline = scanner.nextInt();
+            System.out.print("Profit: ");
+            int profit = scanner.nextInt();
+
+            Job job = new Job(name, deadline, profit);
+            jobs.add(job);
+        }
+
+        // Sort jobs in descending order of profit
+        Collections.sort(jobs, Comparator.comparingInt(Job::getProfit).reversed());
+
+        int maxDeadline = 0;
+        for (Job job : jobs) {
+            if (job.getDeadline() > maxDeadline) {
+                maxDeadline = job.getDeadline();
+            }
+        }
+
+        int[] result = new int[maxDeadline];
+        Arrays.fill(result, -1);
+
+        int totalProfit = 0;
+
+        for (Job job : jobs) {
+            int deadline = job.getDeadline();
+
+            for (int i = deadline - 1; i >= 0; i--) {
+                if (result[i] == -1) {
+                    result[i] = jobs.indexOf(job);
+                    totalProfit += job.getProfit();
+                    break;
+                }
+            }
+        }
+
+        System.out.println("\nJob Schedule:");
+        for (int i = 0; i < maxDeadline; i++) {
+            if (result[i] != -1) {
+                Job job = jobs.get(result[i]);
+                System.out.println("Job: " + job.getName() + ", Deadline: " + job.getDeadline() + ", Profit: " + job.getProfit());
+            }
+        }
+
+        System.out.println("\nTotal Profit: " + totalProfit);
+
+        scanner.close();
+    }
+}

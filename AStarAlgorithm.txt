@@ -1,0 +1,107 @@
+import java.util.*;
+
+class Node implements Comparable<Node> {
+    int id;
+    int heuristic;
+    int gCost;
+    Node parent;
+
+    public Node(int id) {
+        this.id = id;
+        this.heuristic = 0;
+        this.gCost = 0;
+        this.parent = null;
+    }
+
+    public int getFCost() {
+        return heuristic + gCost;
+    }
+
+    @Override
+    public int compareTo(Node other) {
+        return Integer.compare(this.getFCost(), other.getFCost());
+    }
+}
+
+public class AStarAlgorithm {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of nodes: ");
+        int numNodes = scanner.nextInt();
+
+        Node[] graph = new Node[numNodes];
+
+        for (int i = 0; i < numNodes; i++) {
+            graph[i] = new Node(i + 1);
+
+            System.out.print("Enter the heuristic cost for Node " + (i + 1) + ": ");
+            graph[i].heuristic = scanner.nextInt();
+        }
+
+        System.out.print("Enter the start node: ");
+        int startNode = scanner.nextInt();
+
+        System.out.print("Enter the goal node: ");
+        int goalNode = scanner.nextInt();
+
+        System.out.print("Enter the number of edges: ");
+        int numEdges = scanner.nextInt();
+        int[][] edges = new int[numNodes][numNodes];
+
+        System.out.println("Enter the edge costs (gCost) for each edge:");
+        for (int i = 0; i < numEdges; i++) {
+            System.out.print("Enter source node of edge " + (i + 1) + ": ");
+            int src = scanner.nextInt();
+            System.out.print("Enter destination node of edge " + (i + 1) + ": ");
+            int dest = scanner.nextInt();
+            System.out.print("Enter edge cost (gCost) for this edge: ");
+            int cost = scanner.nextInt();
+
+            edges[src - 1][dest - 1] = cost;
+        }
+
+        // Perform A* traversal
+        PriorityQueue<Node> openSet = new PriorityQueue<>();
+        Set<Node> closedSet = new HashSet<>();
+
+        openSet.add(graph[startNode - 1]);
+
+        while (!openSet.isEmpty()) {
+            Node current = openSet.poll();
+
+            if (current.id == goalNode) {
+                // Reached the goal node, construct and print the path
+                List<Integer> path = new ArrayList<>();
+                Node node = current;
+                while (node != null) {
+                    path.add(0, node.id);
+                    node = node.parent;
+                }
+
+                System.out.println("Shortest path from " + startNode + " to " + goalNode + ": " + path);
+                break;
+            }
+
+            closedSet.add(current);
+
+            // Perform A* expansion here
+            for (int i = 0; i < numNodes; i++) {
+                if (i != current.id - 1 && !closedSet.contains(graph[i]) && edges[current.id - 1][i] != 0) {
+                    Node neighbor = graph[i];
+                    int tentativeGCost = current.gCost + edges[current.id - 1][i];
+
+                    if (openSet.contains(neighbor) && tentativeGCost >= neighbor.gCost) {
+                        continue;  // Not a better path
+                    }
+
+                    neighbor.gCost = tentativeGCost;
+                    neighbor.parent = current;
+                    openSet.add(neighbor);
+                }
+            }
+        }
+
+        scanner.close();
+    }
+}
